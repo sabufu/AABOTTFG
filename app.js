@@ -67,7 +67,7 @@ function getRandomIntInclusive(min, max) {
 }
 
 function ver_granja(msg_from, usuario) {
-    let sections = [{title:'Estas son las opciones',rows:[{title:'Ver cultivos'}, {title:'Ir a la tienda'}, {title:'Ver inventario'}, {title:'Retos'}, {title:'Comerciar con amigos'}, {title:'Invitar a un amigo a crearse una granja'}]}];
+    let sections = [{title:'Estas son las opciones',rows:[{title:'Ver cultivos'}, {title:'Ir a la tienda'}, {title:'Ver inventario'}, {title:'Retos'}, {title:'Comerciar con amigos'}, {title:'Invitar a un amigo a crearse una granja'}, {title:'Visitar la granja de un amigo'}]}];
     let list = new List('¿Que quieres hacer en tu granja?','Acciones',sections,'Title','footer');
     // let list = "¿Que quieres hacer en tu granja?\nEstas son las opciones\n-Ver cultivos\n-Ir a la tienda\n-Ver inventario\n-Retos\n-Comerciar con amigos";
     client.sendMessage(msg_from, list);  
@@ -385,7 +385,7 @@ function verInventario(usuario, msg){
     verCajasVerduras(usuario, msg)
     verCantidadSemillas(usuario, msg)
 }
-function construir_granja_iconos(msg, cultivos_encontrados){
+function construir_granja_iconos(numero, cultivos_encontrados){
     if (cultivos_encontrados != null){
 
         
@@ -550,7 +550,7 @@ function construir_granja_iconos(msg, cultivos_encontrados){
                 cadena+="\n";                
             }
         }
-        client.sendMessage(msg.from, cadena);
+        client.sendMessage(numero, cadena);
     }
 }
 
@@ -779,21 +779,21 @@ client.on('message', async msg => {
         usuario.estado++;
         await usuario.save();
         var cultivo = await cultivos.find({ numero_tlf: usuario.numero_tlf }).exec();       
-        construir_granja_iconos(msg, cultivo);
+        construir_granja_iconos(msg.from, cultivo);
         ver_granja(msg.from, usuario);
     }
     else if(usuario != null && usuario.estado == 2 && negaciones.includes(msg.body)){
         usuario.estado++;
         await usuario.save();
         var cultivo = await cultivos.find({ numero_tlf: usuario.numero_tlf }).exec();
-        construir_granja_iconos(msg, cultivo);
+        construir_granja_iconos(msg.from, cultivo);
         ver_granja(msg.from, usuario);    
     }
-    else if(usuario != null && usuario.estado == 3 && msg.body != 'Ver cultivos' && msg.body != 'Ir a la tienda' && msg.body != 'Ver inventario'&& msg.body != 'Retos' && msg.body != 'Comerciar con amigos' && msg.body != 'Invitar a un amigo a crearse una granja'){ // Aqui añadiremos otras condiciones
+    else if(usuario != null && usuario.estado == 3 && msg.body != 'Ver cultivos' && msg.body != 'Ir a la tienda' && msg.body != 'Ver inventario'&& msg.body != 'Retos' && msg.body != 'Comerciar con amigos' && msg.body != 'Invitar a un amigo a crearse una granja' && msg.body != 'Visitar la granja de un amigo'){ // Aqui añadiremos otras condiciones
     //////// MUESTRA MENU DE LA GRANJA /////////////////////// 3
         
         var cultivo = await cultivos.find({ numero_tlf: usuario.numero_tlf }).exec();
-        construir_granja_iconos(msg, cultivo);
+        construir_granja_iconos(msg.from, cultivo);
         ver_granja(msg.from, usuario);
     }
     else if(usuario != null && usuario.estado == 3 && msg.body == 'Ver cultivos'){
@@ -899,7 +899,7 @@ client.on('message', async msg => {
     }
     else if(usuario != null && usuario.estado == 4 && msg.body == 'Volver a la granja'){
         var cultivo = await cultivos.find({ numero_tlf: usuario.numero_tlf }).exec();
-        construir_granja_iconos(msg, cultivo);
+        construir_granja_iconos(msg.from, cultivo);
         ver_granja(msg.from, usuario);
         usuario.estado = 3;
         await usuario.save();
@@ -962,7 +962,7 @@ client.on('message', async msg => {
     }
     else if(usuario != null && usuario.estado == 8 && msg.body == 'Volver a la granja'){
         var cultivo = await cultivos.find({ numero_tlf: usuario.numero_tlf }).exec();
-        construir_granja_iconos(msg, cultivo);
+        construir_granja_iconos(msg.from, cultivo);
         ver_granja(msg.from, usuario);
         usuario.estado = 3;
         await usuario.save();
@@ -1042,6 +1042,44 @@ client.on('message', async msg => {
         }
     }
     ///////////////INVITAR AMIGOS A JUGAR//////////////////30
+    ///////////////VISITAR GRANJA AMIGO/////////////////////50
+    else if(usuario != null && usuario.estado == 3 && msg.body == 'Visitar la granja de un amigo'){
+        client.sendMessage(msg.from, 'Enviame el contacto de la persona a la que quieres visitar');
+        usuario.estado = 50;
+        await usuario.save();
+    }
+    else if(usuario != null && usuario.estado == 50){
+        if (msg.body.startsWith('BEGIN:VCARD')){
+            numero = msg.body.match(/(\+34|0034|34)?[ -]*(6|7)[ -]*([0-9][ -]*){8}/)[0];
+            numero += '@c.us';
+            var usuario_visitar = await users.findOne({ numero_tlf: numero }).exec();
+            if (usuario_visitar != null){
+                client.sendMessage(msg.from, 'Esta es la granja de ' + usuario_visitar.name);
+                usuario.estado = 51;
+                await usuario.save();
+                var cultivo = await cultivos.find({ numero_tlf: usuario_visitar.numero_tlf }).exec();       
+                construir_granja_iconos(msg.from, cultivo);
+                client.sendMessage(msg.from, 'Si quieres volver a tu granja dime que vuelva');
+            }
+            else{
+                client.sendMessage(msg.from, 'El usuario no tiene ninguna granja, invítalo a tener una :), vuelves a tu granja.');
+                usuario.estado = 3;
+                await usuario.save();
+                ver_granja(msg.from, usuario);
+            }
+        } else{
+            client.sendMessage(msg.from, 'Envía un contacto no otra cosa');
+        }
+    }
+    else if(usuario != null && usuario.estado == 51){
+        if(msg.body.match(/volver/ig)){
+            usuario.estado = 3;
+            await usuario.save();
+            client.sendMessage(usuario.numero_tlf, 'Vuelves a tu granja');
+            ver_granja(msg.from, usuario);
+        }
+    }
+    ///////////////VISITAR GRANJA AMIGO/////////////////////50
     ///////////////COMERCIAR CON AMIGOS//////////////////20
     else if(usuario != null && usuario.estado == 3 && msg.body == 'Comerciar con amigos'){
         client.sendMessage(msg.from, 'Enviame el contacto de la persona con la que quieras comerciar');

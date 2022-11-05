@@ -1,24 +1,24 @@
-2022/11/05-18:42:31.216 65e9 Reusing MANIFEST /home/samuel/Escritorio/AABOTTFG/.wwebjs_auth/session/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-002370
-2022/11/05-18:42:31.216 65e9 Recovering log #3240
-2022/11/05-18:42:31.265 65e9 Reusing old log /home/samuel/Escritorio/AABOTTFG/.wwebjs_auth/session/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/003240.log 
-2022/11/05-18:42:45.109 66a8 Level-0 table #3251: started
-2022/11/05-18:42:45.125 66a8 Level-0 table #3251: 1253458 bytes OK
-2022/11/05-18:42:45.127 66a8 Delete type=0 #3240
-2022/11/05-18:42:53.888 65fa Compacting 1@1 + 7@2 files
-2022/11/05-18:42:53.934 65fa Generated table #3252@1: 30591 keys, 2254437 bytes
-2022/11/05-18:42:53.973 65fa Generated table #3253@1: 24226 keys, 2272553 bytes
-2022/11/05-18:42:54.009 65fa Generated table #3254@1: 50075 keys, 2279840 bytes
-2022/11/05-18:42:54.025 65fa Generated table #3255@1: 4665 keys, 2152243 bytes
-2022/11/05-18:42:54.064 65fa Generated table #3256@1: 33876 keys, 2215664 bytes
-2022/11/05-18:42:54.133 65fa Generated table #3257@1: 112816 keys, 2264524 bytes
-2022/11/05-18:42:54.148 65fa Generated table #3258@1: 27077 keys, 526186 bytes
-2022/11/05-18:42:54.148 65fa Compacted 1@1 + 7@2 files => 13965447 bytes
-2022/11/05-18:42:54.149 65fa compacted to: files[ 0 0 7 0 0 0 0 ]
-2022/11/05-18:42:54.150 65fa Delete type=2 #3248
-2022/11/05-18:42:54.150 65fa Delete type=2 #3244
-2022/11/05-18:42:54.150 65fa Delete type=2 #3242
-2022/11/05-18:42:54.150 65fa Delete type=2 #3245
-2022/11/05-18:42:54.150 65fa Delete type=2 #3243
-2022/11/05-18:42:54.150 65fa Delete type=2 #3251
-2022/11/05-18:42:54.150 65fa Delete type=2 #3246
-2022/11/05-18:42:54.150 65fa Delete type=2 #3247
+2022/11/05-19:37:59.133 d448 Reusing MANIFEST /home/samuel/Escritorio/AABOTTFG/.wwebjs_auth/session/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-002370
+2022/11/05-19:37:59.134 d448 Recovering log #3300
+2022/11/05-19:37:59.182 d448 Reusing old log /home/samuel/Escritorio/AABOTTFG/.wwebjs_auth/session/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/003300.log 
+2022/11/05-19:38:13.217 d453 Level-0 table #3311: started
+2022/11/05-19:38:13.237 d453 Level-0 table #3311: 1261994 bytes OK
+2022/11/05-19:38:13.238 d453 Delete type=0 #3300
+2022/11/05-19:38:15.498 d445 Compacting 1@1 + 7@2 files
+2022/11/05-19:38:15.548 d445 Generated table #3312@1: 30016 keys, 2254046 bytes
+2022/11/05-19:38:15.589 d445 Generated table #3313@1: 24059 keys, 2274060 bytes
+2022/11/05-19:38:15.638 d445 Generated table #3314@1: 64006 keys, 2267632 bytes
+2022/11/05-19:38:15.657 d445 Generated table #3315@1: 11402 keys, 2239909 bytes
+2022/11/05-19:38:15.682 d445 Generated table #3316@1: 19073 keys, 2184271 bytes
+2022/11/05-19:38:15.725 d445 Generated table #3317@1: 54649 keys, 2220949 bytes
+2022/11/05-19:38:15.785 d445 Generated table #3318@1: 106226 keys, 2049182 bytes
+2022/11/05-19:38:15.785 d445 Compacted 1@1 + 7@2 files => 15490049 bytes
+2022/11/05-19:38:15.786 d445 compacted to: files[ 0 0 7 0 0 0 0 ]
+2022/11/05-19:38:15.787 d445 Delete type=2 #3303
+2022/11/05-19:38:15.787 d445 Delete type=2 #3306
+2022/11/05-19:38:15.787 d445 Delete type=2 #3305
+2022/11/05-19:38:15.787 d445 Delete type=2 #3302
+2022/11/05-19:38:15.787 d445 Delete type=2 #3307
+2022/11/05-19:38:15.787 d445 Delete type=2 #3311
+2022/11/05-19:38:15.787 d445 Delete type=2 #3304
+2022/11/05-19:38:15.787 d445 Delete type=2 #3308
