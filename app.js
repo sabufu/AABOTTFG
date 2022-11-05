@@ -1099,6 +1099,7 @@ client.on('message', async msg => {
         }
     }
     else if(usuario != null && usuario.estado == 22){ //IMPLEMENTAR POR AQUI QUE SI SE OFRECE UNA CANTIDAD MAYOR QUE LA QUE SE TIENE TARSE QUIETO devolver_num_cajas
+        var diferencia = 0;
         respuesta = msg.body;
         var usuario_comercio = await users.findOne({ numero_tlf: usuario.num_user_comercio}); 
 
@@ -1111,14 +1112,6 @@ client.on('message', async msg => {
         var primer_numero = respuesta.match((/\d+/g))[0];
         var segundo_numero = respuesta.match((/\d+/g))[1];
 
-
-
-        if(usuario.comerciable_vender == 'caja'){
-
-        }else if(usuario.comerciable_vender == 'semilla'){
-            
-        }
-
         usuario.verdura_vender = segunda_verdura;
         usuario.verdura_comprar = primera_verdura;
 
@@ -1128,137 +1121,181 @@ client.on('message', async msg => {
         usuario.cantidad_vender = parseInt(segundo_numero);
         usuario.cantidad_comprar = parseInt(primer_numero);
 
-        await usuario.save();
+        if(usuario.comerciable_vender == 'caja'){
+            diferencia = consultar_cajas(usuario.verdura_vender,usuario) - usuario.cantidad_vender;
+        }else if(usuario.comerciable_vender == 'semilla'){
+            diferencia = consultar_semillas(usuario.verdura_vender,usuario) - usuario.cantidad_vender;
+        }
 
-        usuario_comercio.verdura_vender = primera_verdura;
-        usuario_comercio.verdura_comprar = segunda_verdura;
-        usuario_comercio.comerciable_vender = primer_comerciable;
-        usuario_comercio.comerciable_comprar = segundo_comerciable;   
-        usuario_comercio.cantidad_vender = parseInt(primer_numero);
-        usuario_comercio.cantidad_comprar = parseInt(segundo_numero);
+        if(diferencia >= 0){
 
-        await usuario_comercio.save();
-
-        client.sendMessage(usuario_comercio.numero_tlf, 'Ahora mismo tienes ' + consultar_cajas(primera_verdura, usuario_comercio) + ' cajas de ' + primera_verdura + ', ' + consultar_semillas(primera_verdura, usuario_comercio) + ' semillas de ' + primera_verdura + ' y ' + consultar_cajas(segunda_verdura, usuario_comercio) + ' cajas de ' + segunda_verdura + ', ' + consultar_semillas(segunda_verdura, usuario_comercio) + ' semillas de ' + segunda_verdura);
-        client.sendMessage(usuario_comercio.numero_tlf, usuario.name + ' te ofrece ' + segundo_numero+ ' ' + segundo_comerciable + 's de ' + segunda_verdura + ' a cambio de que le des ' + primer_numero+ ' ' + primer_comerciable + 's de ' + primera_verdura + ', ¿aceptas?');
-        client.sendMessage(msg.from, 'De acuerdo, vamos a esperar a ver si acepta tu oferta');
+            await usuario.save();
+            
+            usuario_comercio.verdura_vender = primera_verdura;
+            usuario_comercio.verdura_comprar = segunda_verdura;
+            usuario_comercio.comerciable_vender = primer_comerciable;
+            usuario_comercio.comerciable_comprar = segundo_comerciable;   
+            usuario_comercio.cantidad_vender = parseInt(primer_numero);
+            usuario_comercio.cantidad_comprar = parseInt(segundo_numero);
+            
+            await usuario_comercio.save();
+            
+            client.sendMessage(usuario_comercio.numero_tlf, 'Ahora mismo tienes ' + consultar_cajas(primera_verdura, usuario_comercio) + ' cajas de ' + primera_verdura + ', ' + consultar_semillas(primera_verdura, usuario_comercio) + ' semillas de ' + primera_verdura + ' y ' + consultar_cajas(segunda_verdura, usuario_comercio) + ' cajas de ' + segunda_verdura + ', ' + consultar_semillas(segunda_verdura, usuario_comercio) + ' semillas de ' + segunda_verdura);
+            client.sendMessage(usuario_comercio.numero_tlf, usuario.name + ' te ofrece ' + segundo_numero+ ' ' + segundo_comerciable + 's de ' + segunda_verdura + ' a cambio de que le des ' + primer_numero+ ' ' + primer_comerciable + 's de ' + primera_verdura + ', ¿aceptas?');
+            client.sendMessage(msg.from, 'De acuerdo, vamos a esperar a ver si acepta tu oferta');
+        }else{
+            client.sendMessage(msg.from, 'No puedes ofrecer más cantidad de la que tienes, hazme otra oferta que sea posible');
+        }
     }
     else if(usuario != null && usuario.estado == 23){
         respuesta = msg.body;
         var usuario_comercio = await users.findOne({ numero_tlf: usuario.num_user_comercio}); 
 
         if (respuesta.match((/si/i))){
-            if(usuario.verdura_vender == 'tomate' && usuario.comerciable_vender == 'semilla'){
-                usuario.semillas_tomate -= usuario.cantidad_vender;
-                usuario_comercio.semillas_tomate += usuario_comercio.cantidad_comprar;
-            }else if(usuario.verdura_vender == 'aguacate' && usuario.comerciable_vender == 'semilla'){
-                usuario.semillas_aguacate -= usuario.cantidad_vender;
-                usuario_comercio.semillas_aguacate += usuario_comercio.cantidad_comprar;
-            }else if(usuario.verdura_vender == 'pepino' && usuario.comerciable_vender == 'semilla'){
-                usuario.semillas_pepino -= usuario.cantidad_vender;
-                usuario_comercio.semillas_pepino += usuario_comercio.cantidad_comprar;   
-            }else if(usuario.verdura_vender == 'maiz' && usuario.comerciable_vender == 'semilla'){
-                usuario.semillas_maiz -= usuario.cantidad_vender;
-                usuario_comercio.semillas_maiz += usuario_comercio.cantidad_comprar;   
-            }else if(usuario.verdura_vender == 'zanahoria' && usuario.comerciable_vender == 'semilla'){
-                usuario.semillas_zanahoria -= usuario.cantidad_vender;
-                usuario_comercio.semillas_zanahoria += usuario_comercio.cantidad_comprar;            
-            }else if(usuario.verdura_vender == 'cebolla' && usuario.comerciable_vender == 'semilla'){
-                usuario.semillas_cebolla -= usuario.cantidad_vender;
-                usuario_comercio.semillas_cebolla += usuario_comercio.cantidad_comprar;   
-            }else if(usuario.verdura_vender == 'patata' && usuario.comerciable_vender == 'semilla'){
-                usuario.semillas_patata -= usuario.cantidad_vender;
-                usuario_comercio.semillas_patata += usuario_comercio.cantidad_comprar;   
-            }else if(usuario.verdura_vender == 'tomate' && usuario.comerciable_vender == 'caja'){
-                usuario.cajas_tomate -= usuario.cantidad_vender;
-                usuario_comercio.cajas_tomate += usuario_comercio.cantidad_comprar;   
-            }else if(usuario.verdura_vender == 'aguacate' && usuario.comerciable_vender == 'caja'){
-                usuario.cajas_aguacate -= usuario.cantidad_vender;
-                usuario_comercio.cajas_aguacate += usuario_comercio.cantidad_comprar;
-            }else if(usuario.verdura_vender == 'pepino' && usuario.comerciable_vender == 'caja'){
-                usuario.cajas_pepino -= usuario.cantidad_vender;
-                usuario_comercio.cajas_pepino += usuario_comercio.cantidad_comprar;
-            }else if(usuario.verdura_vender == 'maiz' && usuario.comerciable_vender == 'caja'){
-                usuario.cajas_maiz -= usuario.cantidad_vender;
-                usuario_comercio.cajas_maiz += usuario_comercio.cantidad_comprar;
-            }else if(usuario.verdura_vender == 'zanahoria' && usuario.comerciable_vender == 'caja'){
-                usuario.cajas_zanahoria -= usuario.cantidad_vender;
-                usuario_comercio.cajas_zanahoria += usuario_comercio.cantidad_comprar;    
-            }else if(usuario.verdura_vender == 'cebolla' && usuario.comerciable_vender == 'caja'){
-                usuario.cajas_cebolla -= usuario.cantidad_vender;
-                usuario_comercio.cajas_cebolla += usuario_comercio.cantidad_comprar; 
-            }else if(usuario.verdura_vender == 'patata' && usuario.comerciable_vender == 'caja'){
-                usuario.cajas_patata -= usuario.cantidad_vender;
-                usuario_comercio.cajas_patata += usuario_comercio.cantidad_comprar; 
+            var diferencia = 0;
+            if(usuario.comerciable_vender == 'caja'){
+                diferencia = consultar_cajas(usuario.verdura_vender,usuario) - usuario.cantidad_vender;
+            }else if(usuario.comerciable_vender == 'semilla'){
+                diferencia = consultar_semillas(usuario.verdura_vender,usuario) - usuario.cantidad_vender;
             }
-
-            if(usuario.verdura_comprar == 'tomate' && usuario.comerciable_comprar == 'semilla'){
-                usuario.semillas_tomate += usuario.cantidad_comprar;
-                usuario_comercio.semillas_tomate -= usuario_comercio.cantidad_vender;
-            }else if(usuario.verdura_comprar == 'aguacate' && usuario.comerciable_comprar == 'semilla'){
-                usuario.semillas_aguacate += usuario.cantidad_comprar;
-                usuario_comercio.semillas_aguacate-= usuario_comercio.cantidad_vender;
-            }else if(usuario.verdura_comprar == 'pepino' && usuario.comerciable_comprar == 'semilla'){
-                usuario.semillas_pepino += usuario.cantidad_comprar;
-                usuario_comercio.semillas_pepino -= usuario_comercio.cantidad_vender;
-            }else if(usuario.verdura_comprar == 'maiz' && usuario.comerciable_comprar == 'semilla'){
-                usuario.semillas_maiz += usuario.cantidad_comprar;
-                usuario_comercio.semillas_maiz -= usuario_comercio.cantidad_vender;
-            }else if(usuario.verdura_comprar == 'zanahoria' && usuario.comerciable_comprar == 'semilla'){
-                usuario.semillas_zanahoria += usuario.cantidad_comprar;
-                usuario_comercio.semillas_zanahoria -= usuario_comercio.cantidad_vender;
-            }else if(usuario.verdura_comprar == 'cebolla' && usuario.comerciable_comprar == 'semilla'){
-                usuario.semillas_cebolla += usuario.cantidad_comprar;
-                usuario_comercio.semillas_cebolla -= usuario_comercio.cantidad_vender;
-            }else if(usuario.verdura_comprar == 'patata' && usuario.comerciable_comprar == 'semilla'){
-                usuario.semillas_patata += usuario.cantidad_comprar;
-                usuario_comercio.semillas_patata -= usuario_comercio.cantidad_vender;
-            }else if(usuario.verdura_comprar == 'tomate' && usuario.comerciable_comprar == 'caja'){
-                usuario.cajas_tomate += usuario.cantidad_comprar;
-                usuario_comercio.cajas_tomate -= usuario_comercio.cantidad_vender;
-            }else if(usuario.verdura_comprar == 'aguacate' && usuario.comerciable_comprar == 'caja'){
-                usuario.cajas_aguacate += usuario.cantidad_comprar;
-                usuario_comercio.cajas_aguacate -= usuario_comercio.cantidad_vender;
-            }else if(usuario.verdura_comprar == 'pepino' && usuario.comerciable_comprar == 'caja'){
-                usuario.cajas_pepino += usuario.cantidad_comprar;
-                usuario_comercio.cajas_pepino -= usuario_comercio.cantidad_vender;
-            }else if(usuario.verdura_comprar == 'maiz' && usuario.comerciable_comprar == 'caja'){
-                usuario.cajas_maiz += usuario.cantidad_comprar;
-                usuario_comercio.cajas_maiz -= usuario_comercio.cantidad_vender;
-            }else if(usuario.verdura_comprar == 'zanahoria' && usuario.comerciable_comprar == 'caja'){
-                usuario.cajas_zanahoria += usuario.cantidad_comprar;
-                usuario_comercio.cajas_zanahoria -= usuario_comercio.cantidad_vender;
-            }else if(usuario.verdura_comprar == 'cebolla' && usuario.comerciable_comprar == 'caja'){
-                usuario.cajas_cebolla += usuario.cantidad_comprar;
-                usuario_comercio.cajas_cebolla -= usuario_comercio.cantidad_vender;
-            }else if(usuario.verdura_comprar == 'patata' && usuario.comerciable_comprar == 'caja'){
-                usuario.cajas_patata += usuario.cantidad_comprar;
-                usuario_comercio.cajas_patata -= usuario_comercio.cantidad_vender;
-            }
-
-            client.sendMessage(usuario_comercio.numero_tlf, 'Genial has recibido' + usuario_comercio.cantidad_comprar + ' ' + usuario_comercio.comerciable_comprar + ' de ' + usuario_comercio.verdura_comprar + ' a cambio de ' + usuario_comercio.cantidad_vender + ' ' + usuario_comercio.comerciable_vender + ' de ' + usuario_comercio.verdura_vender);
-            usuario_comercio.estado = 3;
-            usuario_comercio.num_user_comercio = "";
-            usuario_comercio.verdura_vender = null;
-            usuario_comercio.verdura_comprar = null;
-            usuario_comercio.comerciable_vender = null;
-            usuario_comercio.comerciable_comprar = null;
-            usuario_comercio.cantidad_vender = 0;
-            usuario_comercio.cantidad_comprar = 0;
-            await usuario_comercio.save();
-            ver_granja(usuario_comercio.numero_tlf, usuario_comercio);
             
-            client.sendMessage(usuario.numero_tlf, 'Genial has recibido' + usuario.cantidad_comprar + ' ' + usuario.comerciable_comprar + ' de ' + usuario.verdura_comprar + ' a cambio de ' + usuario.cantidad_vender + ' ' + usuario.comerciable_vender + ' de ' + usuario.verdura_vender);
-            usuario.estado = 3;
-            usuario.num_user_comercio = "";
-            usuario.verdura_vender = null;
-            usuario.verdura_comprar = null;
-            usuario.comerciable_vender = null;
-            usuario.comerciable_comprar = null;
-            usuario.cantidad_vender = 0;
-            usuario.cantidad_comprar = 0;
-            await usuario.save();
-            ver_granja(msg.from, usuario);
+            if(diferencia >= 0){
+                if(usuario.verdura_vender == 'tomate' && usuario.comerciable_vender == 'semilla'){
+                    usuario.semillas_tomate -= usuario.cantidad_vender;
+                    usuario_comercio.semillas_tomate += usuario_comercio.cantidad_comprar;
+                }else if(usuario.verdura_vender == 'aguacate' && usuario.comerciable_vender == 'semilla'){
+                    usuario.semillas_aguacate -= usuario.cantidad_vender;
+                    usuario_comercio.semillas_aguacate += usuario_comercio.cantidad_comprar;
+                }else if(usuario.verdura_vender == 'pepino' && usuario.comerciable_vender == 'semilla'){
+                    usuario.semillas_pepino -= usuario.cantidad_vender;
+                    usuario_comercio.semillas_pepino += usuario_comercio.cantidad_comprar;   
+                }else if(usuario.verdura_vender == 'maiz' && usuario.comerciable_vender == 'semilla'){
+                    usuario.semillas_maiz -= usuario.cantidad_vender;
+                    usuario_comercio.semillas_maiz += usuario_comercio.cantidad_comprar;   
+                }else if(usuario.verdura_vender == 'zanahoria' && usuario.comerciable_vender == 'semilla'){
+                    usuario.semillas_zanahoria -= usuario.cantidad_vender;
+                    usuario_comercio.semillas_zanahoria += usuario_comercio.cantidad_comprar;            
+                }else if(usuario.verdura_vender == 'cebolla' && usuario.comerciable_vender == 'semilla'){
+                    usuario.semillas_cebolla -= usuario.cantidad_vender;
+                    usuario_comercio.semillas_cebolla += usuario_comercio.cantidad_comprar;   
+                }else if(usuario.verdura_vender == 'patata' && usuario.comerciable_vender == 'semilla'){
+                    usuario.semillas_patata -= usuario.cantidad_vender;
+                    usuario_comercio.semillas_patata += usuario_comercio.cantidad_comprar;   
+                }else if(usuario.verdura_vender == 'tomate' && usuario.comerciable_vender == 'caja'){
+                    usuario.cajas_tomate -= usuario.cantidad_vender;
+                    usuario_comercio.cajas_tomate += usuario_comercio.cantidad_comprar;   
+                }else if(usuario.verdura_vender == 'aguacate' && usuario.comerciable_vender == 'caja'){
+                    usuario.cajas_aguacate -= usuario.cantidad_vender;
+                    usuario_comercio.cajas_aguacate += usuario_comercio.cantidad_comprar;
+                }else if(usuario.verdura_vender == 'pepino' && usuario.comerciable_vender == 'caja'){
+                    usuario.cajas_pepino -= usuario.cantidad_vender;
+                    usuario_comercio.cajas_pepino += usuario_comercio.cantidad_comprar;
+                }else if(usuario.verdura_vender == 'maiz' && usuario.comerciable_vender == 'caja'){
+                    usuario.cajas_maiz -= usuario.cantidad_vender;
+                    usuario_comercio.cajas_maiz += usuario_comercio.cantidad_comprar;
+                }else if(usuario.verdura_vender == 'zanahoria' && usuario.comerciable_vender == 'caja'){
+                    usuario.cajas_zanahoria -= usuario.cantidad_vender;
+                    usuario_comercio.cajas_zanahoria += usuario_comercio.cantidad_comprar;    
+                }else if(usuario.verdura_vender == 'cebolla' && usuario.comerciable_vender == 'caja'){
+                    usuario.cajas_cebolla -= usuario.cantidad_vender;
+                    usuario_comercio.cajas_cebolla += usuario_comercio.cantidad_comprar; 
+                }else if(usuario.verdura_vender == 'patata' && usuario.comerciable_vender == 'caja'){
+                    usuario.cajas_patata -= usuario.cantidad_vender;
+                    usuario_comercio.cajas_patata += usuario_comercio.cantidad_comprar; 
+                }
+
+                if(usuario.verdura_comprar == 'tomate' && usuario.comerciable_comprar == 'semilla'){
+                    usuario.semillas_tomate += usuario.cantidad_comprar;
+                    usuario_comercio.semillas_tomate -= usuario_comercio.cantidad_vender;
+                }else if(usuario.verdura_comprar == 'aguacate' && usuario.comerciable_comprar == 'semilla'){
+                    usuario.semillas_aguacate += usuario.cantidad_comprar;
+                    usuario_comercio.semillas_aguacate-= usuario_comercio.cantidad_vender;
+                }else if(usuario.verdura_comprar == 'pepino' && usuario.comerciable_comprar == 'semilla'){
+                    usuario.semillas_pepino += usuario.cantidad_comprar;
+                    usuario_comercio.semillas_pepino -= usuario_comercio.cantidad_vender;
+                }else if(usuario.verdura_comprar == 'maiz' && usuario.comerciable_comprar == 'semilla'){
+                    usuario.semillas_maiz += usuario.cantidad_comprar;
+                    usuario_comercio.semillas_maiz -= usuario_comercio.cantidad_vender;
+                }else if(usuario.verdura_comprar == 'zanahoria' && usuario.comerciable_comprar == 'semilla'){
+                    usuario.semillas_zanahoria += usuario.cantidad_comprar;
+                    usuario_comercio.semillas_zanahoria -= usuario_comercio.cantidad_vender;
+                }else if(usuario.verdura_comprar == 'cebolla' && usuario.comerciable_comprar == 'semilla'){
+                    usuario.semillas_cebolla += usuario.cantidad_comprar;
+                    usuario_comercio.semillas_cebolla -= usuario_comercio.cantidad_vender;
+                }else if(usuario.verdura_comprar == 'patata' && usuario.comerciable_comprar == 'semilla'){
+                    usuario.semillas_patata += usuario.cantidad_comprar;
+                    usuario_comercio.semillas_patata -= usuario_comercio.cantidad_vender;
+                }else if(usuario.verdura_comprar == 'tomate' && usuario.comerciable_comprar == 'caja'){
+                    usuario.cajas_tomate += usuario.cantidad_comprar;
+                    usuario_comercio.cajas_tomate -= usuario_comercio.cantidad_vender;
+                }else if(usuario.verdura_comprar == 'aguacate' && usuario.comerciable_comprar == 'caja'){
+                    usuario.cajas_aguacate += usuario.cantidad_comprar;
+                    usuario_comercio.cajas_aguacate -= usuario_comercio.cantidad_vender;
+                }else if(usuario.verdura_comprar == 'pepino' && usuario.comerciable_comprar == 'caja'){
+                    usuario.cajas_pepino += usuario.cantidad_comprar;
+                    usuario_comercio.cajas_pepino -= usuario_comercio.cantidad_vender;
+                }else if(usuario.verdura_comprar == 'maiz' && usuario.comerciable_comprar == 'caja'){
+                    usuario.cajas_maiz += usuario.cantidad_comprar;
+                    usuario_comercio.cajas_maiz -= usuario_comercio.cantidad_vender;
+                }else if(usuario.verdura_comprar == 'zanahoria' && usuario.comerciable_comprar == 'caja'){
+                    usuario.cajas_zanahoria += usuario.cantidad_comprar;
+                    usuario_comercio.cajas_zanahoria -= usuario_comercio.cantidad_vender;
+                }else if(usuario.verdura_comprar == 'cebolla' && usuario.comerciable_comprar == 'caja'){
+                    usuario.cajas_cebolla += usuario.cantidad_comprar;
+                    usuario_comercio.cajas_cebolla -= usuario_comercio.cantidad_vender;
+                }else if(usuario.verdura_comprar == 'patata' && usuario.comerciable_comprar == 'caja'){
+                    usuario.cajas_patata += usuario.cantidad_comprar;
+                    usuario_comercio.cajas_patata -= usuario_comercio.cantidad_vender;
+                }
+
+                client.sendMessage(usuario_comercio.numero_tlf, 'Genial has recibido' + usuario_comercio.cantidad_comprar + ' ' + usuario_comercio.comerciable_comprar + ' de ' + usuario_comercio.verdura_comprar + ' a cambio de ' + usuario_comercio.cantidad_vender + ' ' + usuario_comercio.comerciable_vender + ' de ' + usuario_comercio.verdura_vender);
+                usuario_comercio.estado = 3;
+                usuario_comercio.num_user_comercio = "";
+                usuario_comercio.verdura_vender = null;
+                usuario_comercio.verdura_comprar = null;
+                usuario_comercio.comerciable_vender = null;
+                usuario_comercio.comerciable_comprar = null;
+                usuario_comercio.cantidad_vender = 0;
+                usuario_comercio.cantidad_comprar = 0;
+                await usuario_comercio.save();
+                ver_granja(usuario_comercio.numero_tlf, usuario_comercio);
+                
+                client.sendMessage(usuario.numero_tlf, 'Genial has recibido' + usuario.cantidad_comprar + ' ' + usuario.comerciable_comprar + ' de ' + usuario.verdura_comprar + ' a cambio de ' + usuario.cantidad_vender + ' ' + usuario.comerciable_vender + ' de ' + usuario.verdura_vender);
+                usuario.estado = 3;
+                usuario.num_user_comercio = "";
+                usuario.verdura_vender = null;
+                usuario.verdura_comprar = null;
+                usuario.comerciable_vender = null;
+                usuario.comerciable_comprar = null;
+                usuario.cantidad_vender = 0;
+                usuario.cantidad_comprar = 0;
+                await usuario.save();
+                ver_granja(msg.from, usuario);
+            }else{
+                client.sendMessage(usuario_comercio.numero_tlf, 'Lo siento no puede comerciar');
+                usuario_comercio.estado = 3;
+                usuario_comercio.num_user_comercio = "";
+                usuario_comercio.verdura_vender = null;
+                usuario_comercio.verdura_comprar = null;
+                usuario_comercio.comerciable_vender = null;
+                usuario_comercio.comerciable_comprar = null;
+                usuario_comercio.cantidad_vender = 0;
+                usuario_comercio.cantidad_comprar = 0;
+                await usuario_comercio.save();
+                ver_granja(usuario_comercio.numero_tlf, usuario_comercio)
+    
+                client.sendMessage(usuario.numero_tlf, 'No puedes aceptar la oferta, no tienes los recursos suficientes');
+                usuario.estado = 3;
+                usuario.num_user_comercio = "";
+                usuario.verdura_vender = null;
+                usuario.verdura_comprar = null;
+                usuario.comerciable_vender = null;
+                usuario.comerciable_comprar = null;
+                usuario.cantidad_vender = 0;
+                usuario.cantidad_comprar = 0;
+                await usuario.save();
+                ver_granja(msg.from, usuario)
+            }
         }
         else if (respuesta.match((/no/i))){
             client.sendMessage(usuario_comercio.numero_tlf, 'Lo siento no quiere comerciar');
