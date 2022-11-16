@@ -1,3 +1,3 @@
-2022/11/16-00:13:07.430 28402 Reusing MANIFEST /home/samuel/Escritorio/AABOTTFG/.wwebjs_auth/session/Default/Sync Data/LevelDB/MANIFEST-000001
-2022/11/16-00:13:07.430 28402 Recovering log #3
-2022/11/16-00:13:07.430 28402 Reusing old log /home/samuel/Escritorio/AABOTTFG/.wwebjs_auth/session/Default/Sync Data/LevelDB/000003.log 
+2022/11/16-19:16:13.454 70ff Reusing MANIFEST /home/samuel/Escritorio/AABOTTFG/.wwebjs_auth/session/Default/Sync Data/LevelDB/MANIFEST-000001
+2022/11/16-19:16:13.454 70ff Recovering log #3
+2022/11/16-19:16:13.454 70ff Reusing old log /home/samuel/Escritorio/AABOTTFG/.wwebjs_auth/session/Default/Sync Data/LevelDB/000003.log 

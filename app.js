@@ -91,7 +91,7 @@ function ver_tienda(msg) {
 } 
 
 function ver_retos(msg) {
-    let sections = [{title:'Estas son las opciones',rows:[{title:'Buscar recompensas en tiempo real'},{title:'Otros retos'}]}];
+    let sections = [{title:'Estas son las opciones',rows:[{title:'Buscar recompensas en tiempo real'},{title:'Otros retos'},{title:'Volver'}]}];
     let list = new List('¿Que quieres hacer?','Acciones',sections,'Title','footer');
     // let list = "¿Que quieres hacer en la tienda?\nEstas son las opciones\n-Comprar semillas\n-Vender cajas de cultivos\nVolver a la granja";
     client.sendMessage(msg.from, list); 
@@ -892,11 +892,19 @@ client.on('message', async msg => {
         var usuario = aniadir_cajas_verdura(usuario, msg.body);
         usuario.estado = 4;
         await usuario.save(); 
-        await cultivos.deleteOne({ numero_tlf: usuario.numero_tlf, tipo: msg.body, listo :true });// esto importante después del usuario.save() si no peta
+        try {
+            await cultivos.deleteOne({ numero_tlf: usuario.numero_tlf, tipo: msg.body, listo :true });// esto importante después del usuario.save() si no peta
+        } catch (error) {
+            
+        }
         ver_cultivos(msg);  
     }
     else if(usuario != null && usuario.estado == 4 && msg.body == 'Eliminar cultivos secos'){
-        await cultivos.deleteMany({ numero_tlf: usuario.numero_tlf, muerto :true });// esto importante después del usuario.save() si no peta
+        try {
+            await cultivos.deleteMany({ numero_tlf: usuario.numero_tlf, muerto :true });// esto importante después del usuario.save() si no peta
+        } catch (error) {
+            
+        }
         ver_cultivos(msg); 
     }
     else if(usuario != null && usuario.estado == 4 && msg.body == 'Volver a la granja'){
@@ -905,6 +913,9 @@ client.on('message', async msg => {
         ver_granja(msg.from, usuario);
         usuario.estado = 3;
         await usuario.save();
+    }
+    else if(usuario != null && usuario.estado == 4 &&  msg.body != 'Plantar nuevo cultivo' && msg.body != 'Regar cultivo' && msg.body != 'Recolectar cultivo' && msg.body != 'Eliminar cultivos secos' && msg.body != 'Volver a la granja'){
+        client.sendMessage(msg.from, 'Lo siento no te he entendido, ¿puedes seleccionar una opción de las acciones que se muestran arriba?');
     }
     else if(usuario != null && usuario.estado == 3 && msg.body == 'Ir a la tienda'){
     //////// MUESTRA MENU DE LA TIENDA /////////////////////// 8
@@ -978,6 +989,9 @@ client.on('message', async msg => {
         usuario.estado = 3;
         await usuario.save();
     }
+    else if(usuario != null && usuario.estado == 8 && msg.body != 'Vender cajas de cultivos' && msg.body != 'Comprar semillas' && msg.body != 'Volver a la granja'){
+        client.sendMessage(msg.from,'Lo siento no te he entendido, ¿puedes seleccionar una opción de las acciones que se muestran arriba?');
+    }
     else if(usuario != null && usuario.estado == 3 && msg.body == 'Ver inventario'){
         verInventario(usuario, msg);
         ver_granja(msg.from, usuario);
@@ -996,9 +1010,26 @@ client.on('message', async msg => {
         usuario.estado = 41;
         await usuario.save();
     }
+    else if(usuario != null && usuario.estado == 40 && msg.body == 'Otros retos'){
+
+        client.sendMessage(msg.from,'Aún no hay más retos disponibles, esto será un a mejora para el futuro. Elige otra opcción de las de arriba');
+
+    }
+    else if(usuario != null && usuario.estado == 40 && msg.body == 'Volver'){
+        usuario.estado = 3;
+        await usuario.save();
+        construir_granja_iconos(msg.from, cultivo);
+        ver_granja(msg.from, usuario);
+    }
+    else if(usuario != null && usuario.estado == 40 && msg.body != 'Buscar recompensas en tiempo real' && msg.body != 'Otros retos'){
+
+        client.sendMessage(msg.from,'Lo siento no te he entendido, ¿puedes seleccionar una opción de las acciones que se muestran arriba?');
+
+    }
     else if(usuario != null && usuario.estado == 41 && msg.body.match((/volver/i)) != null){
         usuario.estado = 3;
         await usuario.save();
+        construir_granja_iconos(msg.from, cultivo);
         ver_granja(msg.from, usuario);
     }
     else if(usuario != null && usuario.estado == 41 && msg.type == 'location'){
@@ -1087,6 +1118,7 @@ client.on('message', async msg => {
             usuario.estado = 3;
             await usuario.save();
             client.sendMessage(usuario.numero_tlf, 'Vuelves a tu granja');
+            construir_granja_iconos(msg.from, cultivo);
             ver_granja(msg.from, usuario);
         }
     }
@@ -1390,178 +1422,6 @@ client.on('message', async msg => {
     ///////////////COMERCIAR CON AMIGOS//////////////////20
 });
 
-
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // if(usuario != null && usuario.estado == 1){
-    //     usuario.name = msg.body;
-    //     await usuario.save();
-    //     console.log(usuario);
-    //     usuario.estado++;
-    // }
-
-    // } else if (msg.body === '!ping') {
-    //     // Send a new message to the same chat
-    //     client.sendMessage(msg.from, 'pong');
-
-    // } else if (msg.body.startsWith('!sendto ')) {
-    //     // Direct send a new message to specific id
-    //     let number = msg.body.split(' ')[1];
-    //     let messageIndex = msg.body.indexOf(number) + number.length;
-    //     let message = msg.body.slice(messageIndex, msg.body.length);
-    //     number = number.includes('@c.us') ? number : `${number}@c.us`;
-    //     let chat = await msg.getChat();
-    //     chat.sendSeen();
-    //     client.sendMessage(number, message);
-
-    // } else if (msg.body.startsWith('!subject ')) {
-    //     // Change the group subject
-    //     let chat = await msg.getChat();
-    //     if (chat.isGroup) {
-    //         let newSubject = msg.body.slice(9);
-    //         chat.setSubject(newSubject);
-    //     } else {
-    //         msg.reply('This command can only be used in a group!');
-    //     }
-    // } else if (msg.body.startsWith('!echo ')) {
-    //     // Replies with the same message
-    //     msg.reply(msg.body.slice(6));
-    // } else if (msg.body.startsWith('!desc ')) {
-    //     // Change the group description
-    //     let chat = await msg.getChat();
-    //     if (chat.isGroup) {
-    //         let newDescription = msg.body.slice(6);
-    //         chat.setDescription(newDescription);
-    //     } else {
-    //         msg.reply('This command can only be used in a group!');
-    //     }
-    // } else if (msg.body === '!leave') {
-    //     // Leave the group
-    //     let chat = await msg.getChat();
-    //     if (chat.isGroup) {
-    //         chat.leave();
-    //     } else {
-    //         msg.reply('This command can only be used in a group!');
-    //     }
-    // } else if (msg.body.startsWith('!join ')) {
-    //     const inviteCode = msg.body.split(' ')[1];
-    //     try {
-    //         await client.acceptInvite(inviteCode);
-    //         msg.reply('Joined the group!');
-    //     } catch (e) {
-    //         msg.reply('That invite code seems to be invalid.');
-    //     }
-    // } else if (msg.body === '!groupinfo') {
-    //     let chat = await msg.getChat();
-    //     if (chat.isGroup) {
-    //         msg.reply(`
-    //             *Group Details*
-    //             Name: ${chat.name}
-    //             Description: ${chat.description}
-    //             Created At: ${chat.createdAt.toString()}
-    //             Created By: ${chat.owner.user}
-    //             Participant count: ${chat.participants.length}
-    //         `);
-    //     } else {
-    //         msg.reply('This command can only be used in a group!');
-    //     }
-    // } else if (msg.body === '!chats') {
-    //     const chats = await client.getChats();
-    //     client.sendMessage(msg.from, `The bot has ${chats.length} chats open.`);
-    // } else if (msg.body === '!info') {
-    //     let info = client.info;
-    //     client.sendMessage(msg.from, `
-    //         *Connection info*
-    //         User name: ${info.pushname}
-    //         My number: ${info.wid.user}
-    //         Platform: ${info.platform}
-    //     `);
-    // } else if (msg.body === '!mediainfo' && msg.hasMedia) {
-    //     const attachmentData = await msg.downloadMedia();
-    //     msg.reply(`
-    //         *Media info*
-    //         MimeType: ${attachmentData.mimetype}
-    //         Filename: ${attachmentData.filename}
-    //         Data (length): ${attachmentData.data.length}
-    //     `);
-    // } else if (msg.body === '!quoteinfo' && msg.hasQuotedMsg) {
-    //     const quotedMsg = await msg.getQuotedMessage();
-
-    //     quotedMsg.reply(`
-    //         ID: ${quotedMsg.id._serialized}
-    //         Type: ${quotedMsg.type}
-    //         Author: ${quotedMsg.author || quotedMsg.from}
-    //         Timestamp: ${quotedMsg.timestamp}
-    //         Has Media? ${quotedMsg.hasMedia}
-    //     `);
-    // } else if (msg.body === '!resendmedia' && msg.hasQuotedMsg) {
-    //     const quotedMsg = await msg.getQuotedMessage();
-    //     if (quotedMsg.hasMedia) {
-    //         const attachmentData = await quotedMsg.downloadMedia();
-    //         client.sendMessage(msg.from, attachmentData, { caption: 'Here\'s your requested media.' });
-    //     }
-    // } else if (msg.body === '!location') {
-    //     msg.reply(new Location(37.422, -122.084, 'Googleplex\nGoogle Headquarters'));
-    // } else if (msg.location) { 
-    //     msg.reply(msg.location);
-    // } else if (msg.body.startsWith('!status ')) {
-    //     const newStatus = msg.body.split(' ')[1];
-    //     await client.setStatus(newStatus);
-    //     msg.reply(`Status was updated to *${newStatus}*`);
-    // } else if (msg.body === '!mention') {
-    //     const contact = await msg.getContact();
-    //     const chat = await msg.getChat();
-    //     chat.sendMessage(`Hi @${contact.number}!`, {
-    //         mentions: [contact]
-    //     });
-    // } else if (msg.body === '!delete') {
-    //     if (msg.hasQuotedMsg) {
-    //         const quotedMsg = await msg.getQuotedMessage();
-    //         if (quotedMsg.fromMe) {
-    //             quotedMsg.delete(true);
-    //         } else {
-    //             msg.reply('I can only delete my own messages');
-    //         }
-    //     }
-    // } else if (msg.body === '!pin') { // fijar chat
-    //     const chat = await msg.getChat();
-    //     await chat.pin();
-    // } else if (msg.body === '!archive') { // archivar chat
-    //     const chat = await msg.getChat();
-    //     await chat.archive();
-    // } else if (msg.body === '!mute') {
-    //     const chat = await msg.getChat();
-    //     // mute the chat for 20 seconds
-    //     const unmuteDate = new Date();
-    //     unmuteDate.setSeconds(unmuteDate.getSeconds() + 20);
-    //     await chat.mute(unmuteDate);
-    // } else if (msg.body === '!typing') {
-    //     const chat = await msg.getChat();
-    //     // simulates typing in the chat
-    //     chat.sendStateTyping();
-    // } else if (msg.body === '!recording') {
-    //     const chat = await msg.getChat();
-    //     // simulates recording audio in the chat
-    //     chat.sendStateRecording();
-    // } else if (msg.body === '!clearstate') {
-    //     const chat = await msg.getChat();
-    //     // stops typing or recording in the chat
-    //     chat.clearState();
-    // } else if (msg.body === '!jumpto') {
-    //     if (msg.hasQuotedMsg) {
-    //         const quotedMsg = await msg.getQuotedMessage();
-    //         client.interface.openChatWindowAt(quotedMsg.id._serialized);
-    //     }
-    // } else if (msg.body === '!buttons') {
-    //     let button = new Buttons('Button body',[{body:'bt1'},{body:'bt2'},{body:'bt3'}],'title','footer');
-    //     client.sendMessage(msg.from, button);
-    // } else if (msg.body === '!list') { // IMPORTANTE
-    //     let sections = [{title:'sectionTitle',rows:[{title:'ListItem1', description: 'desc'},{title:'ListItem2'}]}];
-    //     let list = new List('List body','Acciones',sections,'Title','footer');
-    //     client.sendMessage(msg.from, list);
-    // } else
-    //     msg.reply(msg.body)
-
 client.on('message_create', (msg) => {
     // Fired on all message creations, including your own
     if (msg.fromMe) {
@@ -1625,4 +1485,3 @@ client.on('change_state', state => {
 client.on('disconnected', (reason) => {
     console.log('Client was logged out', reason);
 });
-
