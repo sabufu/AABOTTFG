@@ -1,4 +1,5 @@
-const { Client, Location, List, Buttons, LocalAuth } = require('whatsapp-web.js');
+// const { Client, Location, List, Buttons, LocalAuth } = require('whatsapp-web.js');
+const { Client, Location, List, Buttons, LocalAuth, MessageMedia } = require('./index');
 require("dotenv").config();
 const dbConnect = require('./config/mongo');
 const cultivos = require('./models/cultivos');
@@ -25,7 +26,7 @@ const ubicaciones = [
 ]
 const cadena_ejemplo_granja_pequeña = "\
 🍅🥵      🥑🥵      🥒😊\n \
-                  🥑🥵      🥒😊\n \
+                 🥑🥵      🥒😊\n \
 🍅🥵      🥑🥵      🥒😊\n\n \
 🌽🥵      🏡🏡      🥕😊\n \
 🌽🥵      🏡🏡      🥕😊\n \
@@ -36,7 +37,7 @@ const cadena_ejemplo_granja_pequeña = "\
 const cadena_ejemplo_granja_puntos = "---------------------------\n---------------------------\n\n-------------------🏡-----------------\n-------------------------------------------\n\n------------------\n-----------------";
 const client = new Client({ 
     authStrategy: new LocalAuth(),
-    puppeteer: { headless: true }, //  con esto se abre chromium con el whatsapp web del bot
+    puppeteer: { headless: false }, //  con esto se abre chromium con el whatsapp web del bot
 });
 
 client.initialize(); 
@@ -58,6 +59,7 @@ client.on('auth_failure', msg => {
 
 client.on('ready', () => {
     console.log('READY');
+    var temporizador = setInterval(recordatorio, 1000);
 });
 
 function getRandomIntInclusive(min, max) {
@@ -76,7 +78,7 @@ function ver_granja(msg_from, usuario) {
 function ver_cultivos(msg) {
 
     let sections = [{title:'Estas son las opciones',rows:[{title:'Plantar nuevo cultivo'},{title:'Regar cultivo'},{title:'Recolectar cultivo'},{title:'Eliminar cultivos secos'},{title:'Volver a la granja'}]}];
-    let list = new List('¿Que quieres con los cultivos?','Acciones',sections,'Title','footer');
+    let list = new List('¿Que quieres hacer con los cultivos?','Acciones',sections,'Title','footer');
     // let list = "¿Que quieres con los cultivos?\nEstas son las opciones\nPlantar nuevo cultivo\nRegar cultivo\nRecolectar cultivo\nEliminar cultivos secos\nVolver a la granja";
     client.sendMessage(msg.from, list); 
 } 
@@ -735,7 +737,7 @@ async function recordatorio() {
 
 client.on('message', async msg => {
     //console.log('MESSAGE RECEIVED', msg);
-    var temporizador = setInterval(recordatorio, 100000000); // el unico problema de ponerlo aqui es que para que comience a funcionar tiene que recibir un mensaje el bot después sigue funcionando correctamente
+     // el unico problema de ponerlo aqui es que para que comience a funcionar tiene que recibir un mensaje el bot después sigue funcionando correctamente
     var usuario = await users.findOne({ numero_tlf: msg.from }).exec(); //buscamos al usuario en la bd
     console.log('El resultado de la busqueda es: ', usuario);
     console.log('El contenido del mensaje es', msg);
@@ -747,7 +749,7 @@ client.on('message', async msg => {
 
 
     if (usuario == null && !afirmaciones.includes(msg.body) && !negaciones.includes(msg.body) && saludos.includes(msg.body))
-        msg.reply('¿Quieres registrarte para tener una granja?');
+        msg.reply('¿Quieres registrarte para tener una granja? Esto es un chatbot el cual va a recrear una granja donde vas a tener que cuidar de cultivos, regarlos y recolectarlos. Además va a a poder comprar semillas con monedas del juego para poder cultivar distintos tipos de cultivos. En este chatbot vas a poder interactuar con amigos y jugar de forma multijugador aparte de otros retos. ¿Te unes?');
         
     else if (usuario == null && afirmaciones.includes(msg.body)) {
         const query = new users({
@@ -757,7 +759,7 @@ client.on('message', async msg => {
             estado: 1,
         })
         await query.save();                    
-        msg.reply('Me puedes decir tu nombre?👿🌱');
+        msg.reply('Me puedes decir tu nombre?');
     }
     else if (usuario == null && negaciones.includes(msg.body))
         msg.reply('De acuerdo, otra vez será');
@@ -916,28 +918,33 @@ client.on('message', async msg => {
         usuario.estado = 9;
         await usuario.save();
         client.sendMessage(msg.from, 'Tienes ' + usuario.monedas + 'monedas');
-        client.sendMessage(msg.from, 'Cada semilla cuesta 10 monedas\nIndica primer cuantas semillas quieres y después de que verdura');
+        client.sendMessage(msg.from, 'Cada semilla cuesta 10 monedas\nIndica primer cuantas semillas quieres con números y después de que verdura');
     }
     else if(usuario != null && usuario.estado == 9){
         //////// COMPRAR SEMILLAS /////////////////////// 9
-        var numero_sem = parseInt(msg.body.match(/\d+/gi));/// DA PROBLEMAS
-        var verdura_msg = devolver_verdura_en_mensaje(msg.body);
-        if((numero_sem*10) > usuario.monedas){
-            client.sendMessage(msg.from, 'Te faltan monedas');
-            usuario.estado = 8;
+        if(msg.body.match(/\d+/gi) != null){
+            var numero_sem = parseInt(msg.body.match(/\d+/gi));
+
+            var verdura_msg = devolver_verdura_en_mensaje(msg.body);
+            if((numero_sem*10) > usuario.monedas){
+                client.sendMessage(msg.from, 'Te faltan monedas');
+                usuario.estado = 8;
+            }
+            else{
+                usuario = comprar_semillas(usuario, verdura_msg, numero_sem);
+                usuario.estado = 8;
+                client.sendMessage(msg.from, 'Genial has comprado ' + numero_sem + ' semillas de ' + verdura_msg);
+            }
+            await usuario.save();
+            ver_tienda(msg);
+        } else{
+            client.sendMessage(msg.from, 'Indique de nuevo correctamente cuantas semillas quiere');
         }
-        else{
-            usuario = comprar_semillas(usuario, verdura_msg, numero_sem);
-            usuario.estado = 8;
-            client.sendMessage(msg.from, 'Genial has comprado ' + numero_sem + ' semillas de ' + verdura_msg);
-        }
-        await usuario.save();
-        ver_tienda(msg);
     }
     else if(usuario != null && usuario.estado == 8 && msg.body == 'Vender cajas de cultivos'){
     //////// VENDER CAJAS DE CULTIVOS /////////////////////// 10
         client.sendMessage(msg.from, 'Tienes ' + usuario.monedas + 'monedas');
-        client.sendMessage(msg.from, 'Por cada caja de verduras te podemos dar 10 monedas, dime cuales quires vender y cuantas');
+        client.sendMessage(msg.from, 'Por cada caja de verduras te podemos dar 10 monedas, dime cuales quires vender y cuantas con números');
         verCajasVerduras(usuario, msg);
         usuario.estado = 10;
         await usuario.save();
@@ -945,20 +952,24 @@ client.on('message', async msg => {
     }
     else if(usuario != null && usuario.estado == 10){
         //////// VENDER CAJAS DE CULTIVOS/////////////////////// 10
-        var num_cajas_str = msg.body.match(/\d+/gi);
-        var numero_cajas = parseInt(num_cajas_str);///DA PROBLEMAS
-        var verdura_msg = devolver_verdura_en_mensaje(msg.body);
-        if(consultar_cajas(verdura_msg, usuario) < numero_cajas){
-            client.sendMessage(msg.from, 'No tienes suficientes cajas de ' + verdura_msg);
-            usuario.estado = 8;
+            var num_cajas_str = msg.body.match(/\d+/gi);
+            var numero_cajas = parseInt(num_cajas_str);
+            var verdura_msg = devolver_verdura_en_mensaje(msg.body);
+        if(msg.body.match(/\d+/gi) != null){
+            if(consultar_cajas(verdura_msg, usuario) < numero_cajas){
+                client.sendMessage(msg.from, 'No tienes suficientes cajas de ' + verdura_msg);
+                usuario.estado = 8;
+            }
+            else{
+                usuario = vender_cajas(usuario, verdura_msg, numero_cajas);
+                usuario.estado = 8;
+            }
+            await usuario.save();
+            client.sendMessage(msg.from, 'Ahora tienes ' + usuario.monedas + ' monedas');
+            ver_tienda(msg);
+        } else{
+            client.sendMessage(msg.from, 'Indique de nuevo correctamente cuantas cajas quiere vender');
         }
-        else{
-            usuario = vender_cajas(usuario, verdura_msg, numero_cajas);
-            usuario.estado = 8;
-        }
-        await usuario.save();
-        client.sendMessage(msg.from, 'Ahora tienes ' + usuario.monedas + ' monedas');
-        ver_tienda(msg);
     }
     else if(usuario != null && usuario.estado == 8 && msg.body == 'Volver a la granja'){
         var cultivo = await cultivos.find({ numero_tlf: usuario.numero_tlf }).exec();
@@ -1141,49 +1152,61 @@ client.on('message', async msg => {
         respuesta = msg.body;
         var usuario_comercio = await users.findOne({ numero_tlf: usuario.num_user_comercio}); 
 
-        var primera_verdura = respuesta.match((/tomate|aguacate|pepino|maiz|zanahoria|cebolla|patata/gi))[0];
-        var segunda_verdura = respuesta.match((/tomate|aguacate|pepino|maiz|zanahoria|cebolla|patata/gi))[1];
+        var primera_verdura = null;
+        var segunda_verdura = null;
 
-        var primer_comerciable = respuesta.match((/semilla|caja/gi))[0];
-        var segundo_comerciable = respuesta.match((/semilla|caja/gi))[1];
+        var primer_comerciable = null;
+        var segundo_comerciable = null;
 
-        var primer_numero = respuesta.match((/\d+/g))[0];
-        var segundo_numero = respuesta.match((/\d+/g))[1];
+        var primer_numero = null;
+        var segundo_numero = null;
+        try {
+            primera_verdura = respuesta.match((/tomate|aguacate|pepino|maiz|zanahoria|cebolla|patata/gi))[0];
+            segunda_verdura = respuesta.match((/tomate|aguacate|pepino|maiz|zanahoria|cebolla|patata/gi))[1];
+            primer_comerciable = respuesta.match((/semilla|caja/gi))[0];
+            segundo_comerciable = respuesta.match((/semilla|caja/gi))[1];
+            primer_numero = respuesta.match((/\d+/g))[0];
+            segundo_numero = respuesta.match((/\d+/g))[1];
 
-        usuario.verdura_vender = segunda_verdura;
-        usuario.verdura_comprar = primera_verdura;
-
-        usuario.comerciable_vender = segundo_comerciable;
-        usuario.comerciable_comprar = primer_comerciable;   
-
-        usuario.cantidad_vender = parseInt(segundo_numero);
-        usuario.cantidad_comprar = parseInt(primer_numero);
-
-        if(usuario.comerciable_vender == 'caja'){
-            diferencia = consultar_cajas(usuario.verdura_vender,usuario) - usuario.cantidad_vender;
-        }else if(usuario.comerciable_vender == 'semilla'){
-            diferencia = consultar_semillas(usuario.verdura_vender,usuario) - usuario.cantidad_vender;
+            usuario.verdura_vender = segunda_verdura;
+            usuario.verdura_comprar = primera_verdura;
+    
+            usuario.comerciable_vender = segundo_comerciable;
+            usuario.comerciable_comprar = primer_comerciable;   
+    
+            usuario.cantidad_vender = parseInt(segundo_numero);
+            usuario.cantidad_comprar = parseInt(primer_numero);
+    
+            if(usuario.comerciable_vender == 'caja'){
+                diferencia = consultar_cajas(usuario.verdura_vender,usuario) - usuario.cantidad_vender;
+            }else if(usuario.comerciable_vender == 'semilla'){
+                diferencia = consultar_semillas(usuario.verdura_vender,usuario) - usuario.cantidad_vender;
+            }
+    
+            if(diferencia >= 0){
+    
+                await usuario.save();
+                
+                usuario_comercio.verdura_vender = primera_verdura;
+                usuario_comercio.verdura_comprar = segunda_verdura;
+                usuario_comercio.comerciable_vender = primer_comerciable;
+                usuario_comercio.comerciable_comprar = segundo_comerciable;   
+                usuario_comercio.cantidad_vender = parseInt(primer_numero);
+                usuario_comercio.cantidad_comprar = parseInt(segundo_numero);
+                
+                await usuario_comercio.save();
+                
+                client.sendMessage(usuario_comercio.numero_tlf, 'Ahora mismo tienes ' + consultar_cajas(primera_verdura, usuario_comercio) + ' cajas de ' + primera_verdura + ', ' + consultar_semillas(primera_verdura, usuario_comercio) + ' semillas de ' + primera_verdura + ' y ' + consultar_cajas(segunda_verdura, usuario_comercio) + ' cajas de ' + segunda_verdura + ', ' + consultar_semillas(segunda_verdura, usuario_comercio) + ' semillas de ' + segunda_verdura);
+                client.sendMessage(usuario_comercio.numero_tlf, usuario.name + ' te ofrece ' + segundo_numero+ ' ' + segundo_comerciable + 's de ' + segunda_verdura + ' a cambio de que le des ' + primer_numero+ ' ' + primer_comerciable + 's de ' + primera_verdura + ', ¿aceptas?');
+                client.sendMessage(msg.from, 'De acuerdo, vamos a esperar a ver si acepta tu oferta');
+            }else{
+                client.sendMessage(msg.from, 'No puedes ofrecer más cantidad de la que tienes, hazme otra oferta que sea posible');
+            }
+        }catch (e) {
+            client.sendMessage(msg.from, 'Indica tu oferta correctamente, hay algo incorrecto');
         }
 
-        if(diferencia >= 0){
 
-            await usuario.save();
-            
-            usuario_comercio.verdura_vender = primera_verdura;
-            usuario_comercio.verdura_comprar = segunda_verdura;
-            usuario_comercio.comerciable_vender = primer_comerciable;
-            usuario_comercio.comerciable_comprar = segundo_comerciable;   
-            usuario_comercio.cantidad_vender = parseInt(primer_numero);
-            usuario_comercio.cantidad_comprar = parseInt(segundo_numero);
-            
-            await usuario_comercio.save();
-            
-            client.sendMessage(usuario_comercio.numero_tlf, 'Ahora mismo tienes ' + consultar_cajas(primera_verdura, usuario_comercio) + ' cajas de ' + primera_verdura + ', ' + consultar_semillas(primera_verdura, usuario_comercio) + ' semillas de ' + primera_verdura + ' y ' + consultar_cajas(segunda_verdura, usuario_comercio) + ' cajas de ' + segunda_verdura + ', ' + consultar_semillas(segunda_verdura, usuario_comercio) + ' semillas de ' + segunda_verdura);
-            client.sendMessage(usuario_comercio.numero_tlf, usuario.name + ' te ofrece ' + segundo_numero+ ' ' + segundo_comerciable + 's de ' + segunda_verdura + ' a cambio de que le des ' + primer_numero+ ' ' + primer_comerciable + 's de ' + primera_verdura + ', ¿aceptas?');
-            client.sendMessage(msg.from, 'De acuerdo, vamos a esperar a ver si acepta tu oferta');
-        }else{
-            client.sendMessage(msg.from, 'No puedes ofrecer más cantidad de la que tienes, hazme otra oferta que sea posible');
-        }
     }
     else if(usuario != null && usuario.estado == 23){
         respuesta = msg.body;

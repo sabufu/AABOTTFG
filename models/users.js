@@ -12,10 +12,6 @@ const UserScheme = new mongoose.Schema(
         monedas:{
             type: Number,
         },
-        madurez:{
-            type: ["joven", "adulto", "mayor"],
-            default: "joven",
-        },
         estado:{
             type: Number,
         },
