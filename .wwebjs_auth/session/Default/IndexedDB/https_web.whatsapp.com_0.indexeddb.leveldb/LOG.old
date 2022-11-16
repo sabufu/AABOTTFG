@@ -1,3 +1,37 @@
-2022/11/16-19:19:42.043 789c Reusing MANIFEST /home/samuel/Escritorio/AABOTTFG/.wwebjs_auth/session/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
-2022/11/16-19:19:42.043 789c Recovering log #304
-2022/11/16-19:19:42.057 789c Reusing old log /home/samuel/Escritorio/AABOTTFG/.wwebjs_auth/session/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/000304.log 
+2022/11/16-21:39:26.534 1b5d3 Reusing MANIFEST /home/samuel/Escritorio/AABOTTFG/.wwebjs_auth/session/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2022/11/16-21:39:26.534 1b5d3 Recovering log #382
+2022/11/16-21:39:26.568 1b5d3 Reusing old log /home/samuel/Escritorio/AABOTTFG/.wwebjs_auth/session/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/000382.log 
+2022/11/16-21:40:05.812 1b5d7 Level-0 table #391: started
+2022/11/16-21:40:05.842 1b5d7 Level-0 table #391: 1239257 bytes OK
+2022/11/16-21:40:05.845 1b5d7 Delete type=0 #382
+2022/11/16-21:40:09.526 1b5d3 Compacting 1@1 + 5@2 files
+2022/11/16-21:40:09.579 1b5d3 Generated table #392@1: 31571 keys, 2251964 bytes
+2022/11/16-21:40:09.615 1b5d3 Generated table #393@1: 25783 keys, 2266053 bytes
+2022/11/16-21:40:09.649 1b5d3 Generated table #394@1: 25802 keys, 2256381 bytes
+2022/11/16-21:40:09.695 1b5d3 Generated table #395@1: 76088 keys, 2346870 bytes
+2022/11/16-21:40:09.727 1b5d3 Generated table #396@1: 42952 keys, 1668532 bytes
+2022/11/16-21:40:09.727 1b5d3 Compacted 1@1 + 5@2 files => 10789800 bytes
+2022/11/16-21:40:09.728 1b5d3 compacted to: files[ 0 0 5 0 0 0 0 ]
+2022/11/16-21:40:09.728 1b5d3 Delete type=2 #385
+2022/11/16-21:40:09.728 1b5d3 Delete type=2 #384
+2022/11/16-21:40:09.728 1b5d3 Delete type=2 #386
+2022/11/16-21:40:09.728 1b5d3 Delete type=2 #387
+2022/11/16-21:40:09.728 1b5d3 Delete type=2 #388
+2022/11/16-21:40:09.728 1b5d3 Delete type=2 #391
+2022/11/16-21:43:25.829 1b5d3 Level-0 table #398: started
+2022/11/16-21:43:25.848 1b5d3 Level-0 table #398: 1247430 bytes OK
+2022/11/16-21:43:25.849 1b5d3 Delete type=0 #390
+2022/11/16-21:43:26.319 1b5d3 Compacting 1@1 + 5@2 files
+2022/11/16-21:43:26.371 1b5d3 Generated table #399@1: 31596 keys, 2251957 bytes
+2022/11/16-21:43:26.408 1b5d3 Generated table #400@1: 25766 keys, 2265073 bytes
+2022/11/16-21:43:26.444 1b5d3 Generated table #401@1: 25665 keys, 2259804 bytes
+2022/11/16-21:43:26.492 1b5d3 Generated table #402@1: 78201 keys, 2349752 bytes
+2022/11/16-21:43:26.527 1b5d3 Generated table #403@1: 44667 keys, 1857311 bytes
+2022/11/16-21:43:26.527 1b5d3 Compacted 1@1 + 5@2 files => 10983897 bytes
+2022/11/16-21:43:26.528 1b5d3 compacted to: files[ 0 0 5 0 0 0 0 ]
+2022/11/16-21:43:26.528 1b5d3 Delete type=2 #393
+2022/11/16-21:43:26.528 1b5d3 Delete type=2 #396
+2022/11/16-21:43:26.528 1b5d3 Delete type=2 #395
+2022/11/16-21:43:26.528 1b5d3 Delete type=2 #398
+2022/11/16-21:43:26.528 1b5d3 Delete type=2 #394
+2022/11/16-21:43:26.528 1b5d3 Delete type=2 #392
