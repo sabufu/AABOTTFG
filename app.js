@@ -3,7 +3,6 @@ const { Client, Location, List, Buttons, LocalAuth, MessageMedia } = require('./
 require("dotenv").config();
 const dbConnect = require('./config/mongo');
 const cultivos = require('./models/cultivos');
-const hortalizas = require('./models/hortalizas');
 const users = require('./models/users');
 const afirmaciones = ['Si', 'si', 'Vale', 'vale', 'Ok', 'ok', 'Afirmativo', 'afirmativo'];
 const negaciones = ['No', 'no', 'Negativo', 'negativo'];
