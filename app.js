@@ -891,20 +891,14 @@ client.on('message', async msg => {
         var usuario = aniadir_cajas_verdura(usuario, msg.body);
         usuario.estado = 4;
         await usuario.save(); 
-        try {
-            await cultivos.deleteOne({ numero_tlf: usuario.numero_tlf, tipo: msg.body, listo :true });// esto importante después del usuario.save() si no peta
-        } catch (error) {
-            
-        }
+        await cultivos.deleteOne({ numero_tlf: usuario.numero_tlf, tipo: msg.body, listo :true });// esto importante después del usuario.save() si no peta
         ver_cultivos(msg);  
+
     }
     else if(usuario != null && usuario.estado == 4 && msg.body == 'Eliminar cultivos secos'){
-        try {
-            await cultivos.deleteMany({ numero_tlf: usuario.numero_tlf, muerto :true });// esto importante después del usuario.save() si no peta
-        } catch (error) {
-            
-        }
+        await cultivos.deleteMany({ numero_tlf: usuario.numero_tlf, muerto :true });// esto importante después del usuario.save() si no peta
         ver_cultivos(msg); 
+
     }
     else if(usuario != null && usuario.estado == 4 && msg.body == 'Volver a la granja'){
         var cultivo = await cultivos.find({ numero_tlf: usuario.numero_tlf }).exec();
